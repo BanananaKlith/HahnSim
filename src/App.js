@@ -13,7 +13,7 @@ function App() {
   const [usernameText, setusernameText] = useState("");
   const [passwordText, setPasswordText] = useState("");
   const [token,setToken]=useState("");
-  const [view,setView]=useState("simulatio")
+  const [view,setView]=useState("")
 
   function loginClick() {
     axios.post("https://localhost:7115/User/Login", {
@@ -21,9 +21,7 @@ function App() {
       password: passwordText
     })
     .then((response) => {
-      console.log(response); // Log the response (optional)
       setToken(response.data.token);
-      console.log(token);
       setView("simulation")
 
     })
@@ -60,9 +58,8 @@ function App() {
                 <input type= "text" onChange={(e)=>usernameChange(e.target.value)}/>
                 <label>Password</label>
                 <input type= "password" onChange={(e)=>passwordChange(e.target.value)}/>
-                <input id="remember-me" style={{marginRight:'80px'}} type="checkbox"></input>
-                <label htmlFor="remember-me">Remember me</label>
-                <button style={{backgroundColor:"#f50ee9",border:"none",padding:"0.8vw 7vw",color:"white",fontWeight:"700"}}
+                <label htmlFor="remember-me"><input id="remember-me" type="checkbox"></input>Remember me</label>
+                <button style={{backgroundColor:"#f50ee9",border:"none",padding:"0.8vw 7vw",cursor:"pointer",color:"white",fontWeight:"700"}}
                 onClick={loginClick}>Login</button>
               </div>
               <div className="Second-half"></div>

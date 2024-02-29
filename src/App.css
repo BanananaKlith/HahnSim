@@ -20,7 +20,7 @@
 .Login-form{
   display: flex;
   font-family: "Cabin", sans-serif;
-  padding: 100px 150px 50px 150px;
+  padding: 20px 150px 50px 150px;
   gap: 100px;
   
 }

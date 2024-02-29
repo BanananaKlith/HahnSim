@@ -40,10 +40,7 @@ function simStart() {
         .then((response) => {
             console.log("Simulation started:", response);
             initializeGrid();
-            // Ensure orders are initialized after simulation has started
-            initializeOrders();
-   
-            
+            initializeOrders();      
         })
         .catch((error) => {
             console.error("Error starting simulation: ", error);
@@ -63,7 +60,7 @@ const initializeOrders = () => {
                 setOrders(response.data);
             } else {
                 console.log("No available orders.");
-                setTimeout(initializeOrders, 1000); // Retry after 1 second if no orders are available
+                setTimeout(initializeOrders, 2000); // Retry after 2 seconds if no orders are available
             }
         })
         .catch((error) => {
@@ -122,7 +119,6 @@ function simEnd(){
         return;
     }
 
-    // Start the simulation
     axios.post("https://localhost:7115/Sim/Stop", {}, {
         headers: {
             'Authorization': `Bearer ${token}`
@@ -132,7 +128,7 @@ function simEnd(){
         console.log("Simulation stoped:", response);
     })
     .catch((error) => {
-        console.error("Error starting simulation: ", error);
+        console.error("Error stopping simulation: ", error);
     });
  
     
@@ -206,8 +202,8 @@ async function getTransporter() {
                 }
             });
         }
-        // Introduce a delay before setting inTransit to false
-        await new Promise(resolve => setTimeout(resolve, 6000)); // 2000 ms = 2 seconds
+        // Introduce a delay 
+        await new Promise(resolve => setTimeout(resolve, 1000)); 
         setIntransit(false);
         console.log(response);
         setcargoLoad(response.data.load);
@@ -235,7 +231,7 @@ async function moveToNode(targetIds) {
             setCurrentNode(targetId);
             currentNodeRef.current = targetId;
 
-            // If this is the last element in targetIds, set setArrival
+          
             if (i === targetIds.length - 1) {
                 setCargoArrival("Reached Destination, Unloading...");
             }
@@ -245,6 +241,21 @@ async function moveToNode(targetIds) {
     }
 }
 
+const createOrder=()=>{
+    axios.post("https://localhost:7115/Order/Create", {}, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then((response) => {
+        console.log("Order Created:", response);
+        initializeOrders();
+    })
+    .catch((error) => {
+        console.error("Error starting simulation: ", error);
+    });
+
+}
 
 
 
@@ -259,14 +270,16 @@ const PowerOn = async () => {
             acceptOrder(order);
             const foundPathToOriginNode = findShortestPath(currentNodeRef.current, order.originNodeId);
             const foundPathToTargetNode = findShortestPath(order.originNodeId, order.targetNodeId);
-            // If either path is null, skip to the next iteration
             if (!foundPathToOriginNode || !foundPathToTargetNode) {
-                console.log('One of the paths is null, skipping to next iteration');
+                console.log('One of the paths is null, skipping to next order');
                 continue;
             }
             foundPathToOriginNode.shift();
             foundPathToTargetNode.shift();
             await moveToNode([...foundPathToOriginNode, ...foundPathToTargetNode]);
+        }
+        if (orders.length === 0) {
+            simEnd();
         }
     } catch (error) {
         console.error(error);
@@ -279,12 +292,13 @@ const PowerOn = async () => {
 
 
 
+
 return (
     <div className='sim_Wrapper'>
    {orders && orders.length > 0 
-    ? <button style={{"padding":"0.7em","cursor":"pointer","fontSize":"15px","backgroundColor":"black","color":"white","borderRadius":"10px"}} onClick={PowerOn}>Start Sim</button> 
+    ? <button style={{"padding":"0.7em","cursor":"pointer",border:"0px solid transparent","fontSize":"15px","backgroundColor":"green","color":"white","borderRadius":"10px"}} onClick={PowerOn}>Start Sim</button> 
     : <p>Finding Orders...</p>
-}
+}       <button style={{marginTop:"20px","padding":"0.7em",border:"0px solid transparent","cursor":"pointer","fontSize":"15px","backgroundColor":"black","color":"white","borderRadius":"10px"}} onClick={createOrder}>Create Order</button>
 
     {grid && grid.Nodes && grid.Nodes[currentNode] ? <div>
     <div><h2>Cargo State</h2>
